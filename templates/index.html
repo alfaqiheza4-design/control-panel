@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ezax Agent - Daftar Perangkat</title>
+    <style>
+        body { background-color: #0a0a0a; color: #00ff00; font-family: 'Courier New', monospace; padding: 50px; }
+        h1 { text-shadow: 0 0 10px #00ff00; text-align: center; }
+        .device-list { max-width: 600px; margin: 0 auto; }
+        .device-item { border: 2px solid #00ff00; padding: 15px 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; background-color: #000; box-shadow: 0 0 10px #00ff00 inset; }
+        .status-online { color: #00ff00; font-weight: bold; }
+        .status-offline { color: #ff0000; font-weight: bold; }
+        .btn { background-color: #000; color: #00ff00; border: 2px solid #00ff00; padding: 10px 20px; text-decoration: none; font-family: inherit; cursor: pointer; transition: 0.3s; }
+        .btn:hover { background-color: #00ff00; color: #000; box-shadow: 0 0 20px #00ff00; }
+    </style>
+</head>
+<body>
+    <h1>[ DAFTAR PERANGKAT EZAX ]</h1>
+    <div class="device-list">
+        {% for id, info in devices.items() %}
+        <div class="device-item">
+            <div>
+                <strong>{{ info.name }}</strong><br>
+                Status: <span class="status-{{ info.status }}">{{ info.status | upper }}</span>
+            </div>
+            <a href="/device/{{ id }}" class="btn">BUKA KONTROL</a>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

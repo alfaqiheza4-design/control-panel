@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ezax Agent - Control Panel</title>
+    <style>
+        body { background-color: #0a0a0a; color: #00ff00; font-family: 'Courier New', monospace; text-align: center; padding: 50px; }
+        h1 { text-shadow: 0 0 10px #00ff00; }
+        .btn { background-color: #000; color: #00ff00; border: 2px solid #00ff00; padding: 15px 30px; font-size: 18px; font-family: inherit; cursor: pointer; margin: 10px; box-shadow: 0 0 10px #00ff00 inset; transition: 0.3s; }
+        .btn:hover { background-color: #00ff00; color: #000; box-shadow: 0 0 20px #00ff00; }
+    </style>
+</head>
+<body>
+    <a href="/" class="btn" style="position:absolute; top:20px; left:20px; padding:10px; font-size:14px;">← Kembali</a>
+    <h1>[ KONTROL: {{ device.name }} ]</h1>
+    <p>Status Koneksi: <span id="status">Menunggu...</span></p>
+    
+    <div>
+        <button class="btn" onclick="kirimPerintah('flash_on')">💡 SENTER ON</button>
+        <button class="btn" onclick="kirimPerintah('flash_off')">🔌 SENTER OFF</button>
+    </div>
+
+    <script>
+        const deviceId = "{{ device_id }}";
+        function kirimPerintah(cmd) {
+            fetch(/api/command/${deviceId}, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ command: cmd })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('status').innerText = "Perintah Terkirim: " + cmd;
+                console.log(data);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
