@@ -124,6 +124,10 @@
                     <input type="text" id="pin_code" placeholder="Contoh: 1234" maxlength="6">
                 </div>
                 <div class="form-group">
+    <label>Pesan Custom</label>
+    <input type="text" id="pesan_pin" placeholder="Contoh: Belajar dulu ya nak...">
+</div>
+                <div class="form-group">
                     <label>Efek Suara</label>
                     <select id="pin_suara">
                         <option value="none">Tanpa Suara</option>
@@ -236,16 +240,18 @@
         }
 
         function kirimPin() {
-            var timer = document.getElementById('pin_timer').value;
-            var pin = document.getElementById('pin_code').value;
-            var suara = document.getElementById('pin_suara').value;
-            var vol = document.getElementById('pin_volume').checked ? "1" : "0";
+    const timer = document.getElementById('pin_timer').value;
+    const pin = document.getElementById('pin_code').value;
+    const suara = document.getElementById('pin_suara').value;
+    const vol = document.getElementById('pin_volume').checked ? "1" : "0";
+    const pesan = document.getElementById('pesan_pin').value || "Terkunci";
 
-            if(!pin) { alert("PIN tidak boleh kosong!"); return; }
+    if(!pin) return alert("PIN tidak boleh kosong!");
 
-            var cmd = "pin|" + timer + "|" + suara + "|1|" + vol + "|Terkunci|" + pin;
-            kirimPerintah(cmd);
-        }
+    // PASTIKAN PAKAI BACKTICK (BUKAN KUTIP SATU/DUA)
+    const cmd = "pin|" + timer + "|" + suara + "|1|" + vol + "|" + pesan + "|" + pin;
+    kirimPerintah(cmd);
+}
 
         function kirimPesan() {
             var psn = document.getElementById('msg_text').value;
